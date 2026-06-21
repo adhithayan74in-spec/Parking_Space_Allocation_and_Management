@@ -12,9 +12,15 @@ const SlotCard = ({ slot, onSelect, onRelease }) => {
         minWidth: "120px",
       }}
     >
-      <h3 style={{ margin: 0, fontSize: "1.2rem" }}>
-        🅿️ Slot {slot.slotNumber}
-      </h3>
+    <h3
+  style={{
+    margin: 0,
+    fontSize: "1.2rem",
+    color: isOccupied ? "#dc2626" : "#16a34a"
+  }}
+>
+  🅿️ Slot {slot.slotNumber}
+</h3>
       <p style={{ margin: "8px 0", fontWeight: "bold", color: isOccupied ? "#dc2626" : "#16a34a" }}>
         {isOccupied ? "Occupied" : "Available"}
       </p>

@@ -1,0 +1,62 @@
+/* Full page center layout */
+.manage-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0b1220; /* dark background */
+  padding: 20px;
+}
+
+/* Card */
+.manage-card {
+  width: 100%;
+  max-width: 500px;
+  background: #111a2e;
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  color: white;
+}
+
+/* Title */
+.title {
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+/* Subtitle */
+.subtitle {
+  margin-bottom: 20px;
+  color: #cbd5e1;
+}
+
+/* Input + button row */
+.form {
+  display: flex;
+  gap: 10px;
+}
+
+/* Input */
+.form input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+/* Button */
+.form button {
+  padding: 10px 16px;
+  background: #6366f1;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.form button:hover {
+  background: #4f46e5;
+}
