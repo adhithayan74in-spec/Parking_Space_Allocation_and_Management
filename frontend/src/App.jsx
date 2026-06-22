@@ -5,6 +5,7 @@ import AllocatePage from "./pages/AllocatePage";
 import ManagePage from "./pages/ManagePage";
 import LoginPage from "./pages/LoginPage";
 import Register from "./pages/Register";
+import BookingPage from "./pages/BookingPage";
 
 const getUser = () => {
   try {
@@ -49,6 +50,7 @@ function App() {
 
         <Route path="/" element={<ProtectedLayout><HomePage /></ProtectedLayout>} />
         <Route path="/allocate" element={<ProtectedLayout><AllocatePage /></ProtectedLayout>} />
+        <Route path="/booking/:id" element={<ProtectedLayout><BookingPage /></ProtectedLayout>} />
 
         {/* Admin only */}
         <Route path="/manage" element={<AdminRoute><ManagePage /></AdminRoute>} />

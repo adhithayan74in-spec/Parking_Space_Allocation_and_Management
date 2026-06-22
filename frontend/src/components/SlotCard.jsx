@@ -1,16 +1,16 @@
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 export default function SlotCard({ slot, onRefresh }) {
-  const park = async () => {
-    const vehicleNumber = prompt("Enter vehicle number:");
-    if (!vehicleNumber) return;
-    await api.put(`/parking/park/${slot._id}`, { vehicleNumber });
-    onRefresh();
+  const navigate = useNavigate();
+
+  const park = () => {
+    navigate("/booking/" + slot._id, { state: { slot } });
   };
 
   const release = async () => {
-    if (!window.confirm(`Release slot ${slot.slotNumber}?`)) return;
-    await api.put(`/parking/release/${slot._id}`);
+    if (!window.confirm("Release slot " + slot.slotNumber + "?")) return;
+    await api.put("/parking/release/" + slot._id);
     onRefresh();
   };
 
@@ -21,14 +21,11 @@ export default function SlotCard({ slot, onRefresh }) {
       style={{
         ...styles.card,
         borderColor: occupied ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.25)",
-        boxShadow: occupied
-          ? "0 4px 24px rgba(239,68,68,0.07)"
-          : "0 4px 24px rgba(34,197,94,0.07)",
+        boxShadow: occupied ? "0 4px 24px rgba(239,68,68,0.07)" : "0 4px 24px rgba(34,197,94,0.07)",
       }}
-      onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
-      onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+      onMouseEnter={function(e) { e.currentTarget.style.transform = "translateY(-3px)"; }}
+      onMouseLeave={function(e) { e.currentTarget.style.transform = "translateY(0)"; }}
     >
-      {/* Top color bar */}
       <div style={{
         ...styles.indicator,
         background: occupied
@@ -36,31 +33,28 @@ export default function SlotCard({ slot, onRefresh }) {
           : "linear-gradient(90deg, #22c55e, #4ade80)",
       }} />
 
-      {/* Slot number */}
       <div style={styles.slotNum}>
         <span style={{ fontSize: "0.7rem", color: "#64748b", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Slot</span>
         <br />
         {slot.slotNumber}
       </div>
 
-      {/* Vehicle number or empty icon */}
       {slot.vehicleNumber ? (
         <div style={styles.vehicleBox}>
-          <span style={styles.vehicleIcon}>🚗</span>
+          <span style={styles.vehicleIcon}>Car</span>
           <span style={styles.vehicleText}>{slot.vehicleNumber}</span>
         </div>
       ) : (
         <div style={styles.emptySlot}>
-          <span style={{ fontSize: "1.6rem" }}>🅿️</span>
+          <span style={{ fontSize: "1.6rem" }}>P</span>
         </div>
       )}
 
-      {/* Status badge */}
       <div style={{
         ...styles.badge,
         background: occupied ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)",
         color: occupied ? "#f87171" : "#4ade80",
-        border: `1px solid ${occupied ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.25)"}`,
+        border: "1px solid " + (occupied ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.25)"),
       }}>
         <span style={{
           display: "inline-block", width: "6px", height: "6px", borderRadius: "50%",
@@ -70,7 +64,6 @@ export default function SlotCard({ slot, onRefresh }) {
         {occupied ? "Occupied" : "Available"}
       </div>
 
-      {/* Action button */}
       <button
         style={{
           ...styles.btn,
@@ -82,10 +75,10 @@ export default function SlotCard({ slot, onRefresh }) {
             : "0 4px 14px rgba(34,197,94,0.3)",
         }}
         onClick={occupied ? release : park}
-        onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
-        onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+        onMouseEnter={function(e) { e.currentTarget.style.opacity = "0.88"; }}
+        onMouseLeave={function(e) { e.currentTarget.style.opacity = "1"; }}
       >
-        {occupied ? "⬆ Release" : "⬇ Park Here"}
+        {occupied ? "Release" : "Park Here"}
       </button>
     </div>
   );
@@ -93,44 +86,26 @@ export default function SlotCard({ slot, onRefresh }) {
 
 const styles = {
   card: {
-    background: "linear-gradient(145deg, #1e293b, #1a2540)",
-    border: "1px solid",
-    borderRadius: "18px",
-    padding: "22px 16px 18px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "12px",
-    position: "relative",
-    overflow: "hidden",
-    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-    cursor: "default",
+    background: "linear-gradient(145deg, #1e293b, #1a2540)", border: "1px solid",
+    borderRadius: "18px", padding: "22px 16px 18px", display: "flex",
+    flexDirection: "column", alignItems: "center", gap: "12px",
+    position: "relative", overflow: "hidden",
+    transition: "transform 0.2s ease, box-shadow 0.2s ease", cursor: "default",
   },
-  indicator: {
-    position: "absolute", top: 0, left: 0, right: 0, height: "4px",
-    borderRadius: "18px 18px 0 0",
-  },
+  indicator: { position: "absolute", top: 0, left: 0, right: 0, height: "4px", borderRadius: "18px 18px 0 0" },
   slotNum: {
-    fontSize: "1.6rem",
-    fontWeight: 800,
-    color: "#f1f5f9",
-    textAlign: "center",
-    lineHeight: 1.2,
-    letterSpacing: "-0.02em",
-    marginTop: "4px",
+    fontSize: "1.6rem", fontWeight: 800, color: "#f1f5f9",
+    textAlign: "center", lineHeight: 1.2, letterSpacing: "-0.02em", marginTop: "4px",
   },
   vehicleBox: {
-    display: "flex", alignItems: "center", gap: "6px",
-    background: "#0f172a", borderRadius: "8px",
-    padding: "6px 12px", width: "100%", justifyContent: "center",
+    display: "flex", alignItems: "center", gap: "6px", background: "#0f172a",
+    borderRadius: "8px", padding: "6px 12px", width: "100%", justifyContent: "center",
   },
   vehicleIcon: { fontSize: "0.9rem" },
   vehicleText: { fontSize: "0.78rem", color: "#94a3b8", fontFamily: "monospace", fontWeight: 600 },
   emptySlot: {
-    background: "#0f172a", borderRadius: "8px",
-    padding: "8px", width: "100%",
-    display: "flex", justifyContent: "center",
-    opacity: 0.5,
+    background: "#0f172a", borderRadius: "8px", padding: "8px",
+    width: "100%", display: "flex", justifyContent: "center", opacity: 0.5,
   },
   badge: {
     padding: "5px 14px", borderRadius: "20px", fontSize: "0.72rem",
