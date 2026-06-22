@@ -10,8 +10,12 @@ export default function SlotCard({ slot, onRefresh }) {
 
   const release = async () => {
     if (!window.confirm("Release slot " + slot.slotNumber + "?")) return;
-    await api.put("/parking/release/" + slot._id);
-    onRefresh();
+    try {
+      await api.post("/parking/release/" + slot._id);  // POST not PUT
+      onRefresh();
+    } catch (err) {
+      alert(err.response?.data?.message || "Could not release slot.");
+    }
   };
 
   const occupied = slot.status === "occupied";
@@ -41,12 +45,12 @@ export default function SlotCard({ slot, onRefresh }) {
 
       {slot.vehicleNumber ? (
         <div style={styles.vehicleBox}>
-          <span style={styles.vehicleIcon}>Car</span>
+          <span style={styles.vehicleIcon}>🚗</span>
           <span style={styles.vehicleText}>{slot.vehicleNumber}</span>
         </div>
       ) : (
         <div style={styles.emptySlot}>
-          <span style={{ fontSize: "1.6rem" }}>P</span>
+          <span style={{ fontSize: "1.6rem" }}>🅿️</span>
         </div>
       )}
 

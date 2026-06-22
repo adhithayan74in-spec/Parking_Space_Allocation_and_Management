@@ -9,21 +9,30 @@ export default function BookingPage() {
   const slot = state?.slot;
 
   const [vehicleNumber, setVehicleNumber] = useState("");
-  const [duration, setDuration] = useState(1);
+  const [vehicleType, setVehicleType] = useState("Car");
+  const [arrivalTime, setArrivalTime] = useState("");
+  const [leavingTime, setLeavingTime] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
 
   const handleBook = async () => {
-    if (!vehicleNumber.trim()) {
-      setError("Please enter a vehicle number.");
-      return;
-    }
+    if (!vehicleNumber.trim()) { setError("Please enter a vehicle number."); return; }
+    if (!arrivalTime || !leavingTime) { setError("Please select arrival and leaving time."); return; }
+    if (new Date(leavingTime) <= new Date(arrivalTime)) { setError("Leaving time must be after arrival time."); return; }
+
     setLoading(true);
     try {
-      await api.put(`/parking/park/${id}`, { vehicleNumber, duration });
-      navigate("/allocate");
+      await api.post("/parking/book", {
+        slotId: id,
+        vehicleNumber: vehicleNumber.trim().toUpperCase(),
+        vehicleType,
+        arrivalTime,
+        leavingTime,
+      });
+      setConfirmed(true);
     } catch (err) {
-      setError("Booking failed. Please try again.");
+      setError(err.response?.data?.message || "Booking failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -32,6 +41,44 @@ export default function BookingPage() {
   if (!slot) {
     navigate("/allocate");
     return null;
+  }
+
+  if (confirmed) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.card}>
+          <div style={{ fontSize: "3rem", textAlign: "center" }}>✅</div>
+          <h2 style={{ ...styles.title, textAlign: "center" }}>Booking Confirmed!</h2>
+          <p style={{ color: "#64748b", textAlign: "center", margin: 0 }}>
+            Slot {slot.slotNumber} is reserved for {vehicleNumber}
+          </p>
+          <div style={styles.summary}>
+            <div style={styles.summaryRow}>
+              <span style={styles.summaryKey}>Vehicle</span>
+              <span style={styles.summaryVal}>{vehicleNumber}</span>
+            </div>
+            <div style={styles.divider} />
+            <div style={styles.summaryRow}>
+              <span style={styles.summaryKey}>Type</span>
+              <span style={styles.summaryVal}>{vehicleType}</span>
+            </div>
+            <div style={styles.divider} />
+            <div style={styles.summaryRow}>
+              <span style={styles.summaryKey}>Arrival</span>
+              <span style={styles.summaryVal}>{new Date(arrivalTime).toLocaleString()}</span>
+            </div>
+            <div style={styles.divider} />
+            <div style={styles.summaryRow}>
+              <span style={styles.summaryKey}>Leaving</span>
+              <span style={styles.summaryVal}>{new Date(leavingTime).toLocaleString()}</span>
+            </div>
+          </div>
+          <button style={styles.confirmBtn} onClick={() => navigate("/allocate")}>
+            Back to Slots
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -43,39 +90,56 @@ export default function BookingPage() {
         </div>
 
         <h2 style={styles.title}>Book Parking Slot</h2>
-        <p style={styles.subtitle}>Fill in the details below to confirm your booking</p>
+        <p style={styles.subtitle}>Fill in the details to confirm your booking</p>
 
         <div style={styles.field}>
           <label style={styles.label}>Vehicle Number</label>
           <input
             style={styles.input}
-            placeholder="e.g. KL 07 AB 1234"
+            placeholder="e.g. KL07AB1234"
             value={vehicleNumber}
-            onChange={(e) => {
-              setVehicleNumber(e.target.value.toUpperCase());
-              setError("");
-            }}
+            onChange={(e) => { setVehicleNumber(e.target.value.toUpperCase()); setError(""); }}
           />
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Duration (hours)</label>
-          <div style={styles.durationRow}>
-            <button style={styles.durationBtn} onClick={() => setDuration((d) => Math.max(1, d - 1))}>−</button>
-            <span style={styles.durationValue}>{duration} hr{duration > 1 ? "s" : ""}</span>
-            <button style={styles.durationBtn} onClick={() => setDuration((d) => Math.min(24, d + 1))}>+</button>
-          </div>
+          <label style={styles.label}>Vehicle Type</label>
+          <select
+            style={styles.input}
+            value={vehicleType}
+            onChange={(e) => setVehicleType(e.target.value)}
+          >
+            <option value="Car">Car</option>
+            <option value="Bike">Bike</option>
+            <option value="SUV">SUV</option>
+            <option value="Truck">Truck</option>
+          </select>
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Arrival Time</label>
+          <input
+            style={styles.input}
+            type="datetime-local"
+            value={arrivalTime}
+            onChange={(e) => { setArrivalTime(e.target.value); setError(""); }}
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Leaving Time</label>
+          <input
+            style={styles.input}
+            type="datetime-local"
+            value={leavingTime}
+            onChange={(e) => { setLeavingTime(e.target.value); setError(""); }}
+          />
         </div>
 
         <div style={styles.summary}>
           <div style={styles.summaryRow}>
             <span style={styles.summaryKey}>Slot</span>
             <span style={styles.summaryVal}>#{slot.slotNumber}</span>
-          </div>
-          <div style={styles.divider} />
-          <div style={styles.summaryRow}>
-            <span style={styles.summaryKey}>Duration</span>
-            <span style={styles.summaryVal}>{duration} hr{duration > 1 ? "s" : ""}</span>
           </div>
           <div style={styles.divider} />
           <div style={styles.summaryRow}>
@@ -125,29 +189,11 @@ const styles = {
   title: { color: "#f1f5f9", fontSize: "1.4rem", fontWeight: 800, margin: 0, letterSpacing: "-0.02em" },
   subtitle: { color: "#64748b", fontSize: "0.85rem", margin: 0 },
   field: { display: "flex", flexDirection: "column", gap: "8px" },
-  label: {
-    color: "#94a3b8", fontSize: "0.78rem", fontWeight: 600,
-    textTransform: "uppercase", letterSpacing: "0.06em",
-  },
+  label: { color: "#94a3b8", fontSize: "0.78rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" },
   input: {
     background: "#0f172a", border: "1px solid rgba(99,102,241,0.25)",
     borderRadius: "10px", padding: "12px 14px", color: "#f1f5f9",
-    fontSize: "1rem", outline: "none", fontFamily: "monospace", letterSpacing: "0.05em",
-  },
-  durationRow: {
-    display: "flex", alignItems: "center", gap: "16px", background: "#0f172a",
-    border: "1px solid rgba(99,102,241,0.25)", borderRadius: "10px",
-    padding: "8px 14px", width: "fit-content",
-  },
-  durationBtn: {
-    background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)",
-    borderRadius: "6px", color: "#818cf8", width: "30px", height: "30px",
-    fontSize: "1.1rem", cursor: "pointer", fontWeight: 700,
-    display: "flex", alignItems: "center", justifyContent: "center",
-  },
-  durationValue: {
-    color: "#f1f5f9", fontWeight: 700, fontSize: "0.95rem",
-    minWidth: "60px", textAlign: "center",
+    fontSize: "1rem", outline: "none", width: "100%", boxSizing: "border-box",
   },
   summary: {
     background: "#0f172a", borderRadius: "12px", padding: "16px 18px",
@@ -167,6 +213,7 @@ const styles = {
     background: "linear-gradient(135deg, #6366f1, #4f46e5)", border: "none",
     borderRadius: "12px", padding: "14px", color: "white", fontWeight: 700,
     fontSize: "1rem", boxShadow: "0 4px 14px rgba(99,102,241,0.35)", marginTop: "4px",
+    cursor: "pointer",
   },
   cancelBtn: {
     background: "transparent", border: "1px solid rgba(148,163,184,0.15)",
