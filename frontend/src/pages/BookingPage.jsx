@@ -19,7 +19,7 @@ export default function BookingPage() {
   const handleBook = async () => {
     if (!vehicleNumber.trim()) { setError("Please enter a vehicle number."); return; }
     if (!arrivalTime || !leavingTime) { setError("Please select arrival and leaving time."); return; }
-    if (new Date(leavingTime) <= new Date(arrivalTime)) { setError("Leaving time must be after arrival time."); return; }
+    if (leavingTime <= arrivalTime) { setError("Leaving time must be after arrival time."); return; }
 
     setLoading(true);
     try {
@@ -65,12 +65,12 @@ export default function BookingPage() {
             <div style={styles.divider} />
             <div style={styles.summaryRow}>
               <span style={styles.summaryKey}>Arrival</span>
-              <span style={styles.summaryVal}>{new Date(arrivalTime).toLocaleString()}</span>
+              <span style={styles.summaryVal}>{arrivalTime}</span>
             </div>
             <div style={styles.divider} />
             <div style={styles.summaryRow}>
               <span style={styles.summaryKey}>Leaving</span>
-              <span style={styles.summaryVal}>{new Date(leavingTime).toLocaleString()}</span>
+              <span style={styles.summaryVal}>{leavingTime}</span>
             </div>
           </div>
           <button style={styles.confirmBtn} onClick={() => navigate("/allocate")}>
@@ -120,7 +120,7 @@ export default function BookingPage() {
           <label style={styles.label}>Arrival Time</label>
           <input
             style={styles.input}
-            type="datetime-local"
+            type="time"
             value={arrivalTime}
             onChange={(e) => { setArrivalTime(e.target.value); setError(""); }}
           />
@@ -130,7 +130,7 @@ export default function BookingPage() {
           <label style={styles.label}>Leaving Time</label>
           <input
             style={styles.input}
-            type="datetime-local"
+            type="time"
             value={leavingTime}
             onChange={(e) => { setLeavingTime(e.target.value); setError(""); }}
           />
@@ -194,6 +194,7 @@ const styles = {
     background: "#0f172a", border: "1px solid rgba(99,102,241,0.25)",
     borderRadius: "10px", padding: "12px 14px", color: "#f1f5f9",
     fontSize: "1rem", outline: "none", width: "100%", boxSizing: "border-box",
+    colorScheme: "dark",
   },
   summary: {
     background: "#0f172a", borderRadius: "12px", padding: "16px 18px",
