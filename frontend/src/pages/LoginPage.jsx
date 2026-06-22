@@ -1,20 +1,32 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import api from "../api/axios";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       setError("Please enter your email and password.");
       return;
     }
-    localStorage.setItem("isLoggedIn", "true");
-    navigate("/");
-    window.location.reload();
+    setLoading(true);
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      navigate("/");
+      window.location.reload();
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,7 +53,9 @@ export default function LoginPage() {
           onKeyDown={(e) => e.key === "Enter" && handleLogin()}
         />
 
-        <button style={styles.btn} onClick={handleLogin}>Sign In</button>
+        <button style={styles.btn} onClick={handleLogin} disabled={loading}>
+          {loading ? "Signing in..." : "Sign In"}
+        </button>
 
         <p style={styles.registerText}>
           Don't have an account?{" "}

@@ -46,9 +46,6 @@ export default function HomePage() {
           <button style={styles.primaryBtn} onClick={() => navigate("/allocate")}>
             🅿️ View Slots
           </button>
-          <button style={styles.secondaryBtn} onClick={() => navigate("/manage")}>
-            ⚙️ Manage Slots
-          </button>
         </div>
       </div>
     </div>

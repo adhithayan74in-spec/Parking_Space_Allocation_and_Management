@@ -6,9 +6,30 @@ import ManagePage from "./pages/ManagePage";
 import LoginPage from "./pages/LoginPage";
 import Register from "./pages/Register";
 
+const getUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user"));
+  } catch {
+    return null;
+  }
+};
+
 function ProtectedLayout({ children }) {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   if (!isLoggedIn) return <Navigate to="/login" />;
+  return (
+    <div style={{ minHeight: "100vh", background: "#0f172a" }}>
+      <Navbar />
+      {children}
+    </div>
+  );
+}
+
+function AdminRoute({ children }) {
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const user = getUser();
+  if (!isLoggedIn) return <Navigate to="/login" />;
+  if (user?.role !== "admin") return <Navigate to="/" />;
   return (
     <div style={{ minHeight: "100vh", background: "#0f172a" }}>
       <Navbar />
@@ -28,7 +49,9 @@ function App() {
 
         <Route path="/" element={<ProtectedLayout><HomePage /></ProtectedLayout>} />
         <Route path="/allocate" element={<ProtectedLayout><AllocatePage /></ProtectedLayout>} />
-        <Route path="/manage" element={<ProtectedLayout><ManagePage /></ProtectedLayout>} />
+
+        {/* Admin only */}
+        <Route path="/manage" element={<AdminRoute><ManagePage /></AdminRoute>} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

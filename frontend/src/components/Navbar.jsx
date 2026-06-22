@@ -1,12 +1,22 @@
 import { Link, useLocation } from "react-router-dom";
 
+const getUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user"));
+  } catch {
+    return null;
+  }
+};
+
 export default function Navbar() {
   const location = useLocation();
+  const user = getUser();
+  const isAdmin = user?.role === "admin";
 
   const links = [
     { to: "/", label: "🏠 Home" },
     { to: "/allocate", label: "🅿️ Slots" },
-    { to: "/manage", label: "⚙️ Manage" },
+    ...(isAdmin ? [{ to: "/manage", label: "⚙️ Manage" }] : []),
   ];
 
   return (
@@ -26,10 +36,16 @@ export default function Navbar() {
           </Link>
         ))}
       </div>
+      <span style={styles.userBadge}>
+        {user?.name || ""}
+        {isAdmin && <span style={styles.adminTag}>admin</span>}
+      </span>
       <button
         style={styles.logout}
         onClick={() => {
           localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
           window.location.href = "/login";
         }}
       >
@@ -57,8 +73,26 @@ const styles = {
     borderRadius: "8px", fontSize: "0.9rem", fontWeight: 600, transition: "all 0.15s",
   },
   activeLink: { color: "#f1f5f9", background: "#1e293b" },
+  userBadge: {
+    marginLeft: "auto",
+    color: "#94a3b8",
+    fontSize: "0.85rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  adminTag: {
+    background: "#7c3aed20",
+    color: "#a78bfa",
+    border: "1px solid #7c3aed40",
+    borderRadius: "20px",
+    padding: "2px 8px",
+    fontSize: "0.7rem",
+    fontWeight: 700,
+    textTransform: "uppercase",
+  },
   logout: {
-    marginLeft: "auto", padding: "8px 16px", background: "#ef444420",
+    marginLeft: "12px", padding: "8px 16px", background: "#ef444420",
     color: "#f87171", border: "1px solid #ef444440", borderRadius: "8px",
     fontSize: "0.85rem", fontWeight: 600, cursor: "pointer",
   },
