@@ -3,19 +3,25 @@ import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 
 export default function Register() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async () => {
-    if (!email || !password) { setError("Please fill in all fields."); return; }
+    if (!name || !email || !password) { setError("Please fill in all fields."); return; }
+    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    setLoading(true);
     try {
-      await api.post("/auth/register", { email, password });
+      await api.post("/auth/signup", { name, email, password });
       alert("Account created! Please sign in.");
       navigate("/login");
-    } catch {
-      setError("Registration failed. Try a different email.");
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed. Try a different email.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -28,12 +34,16 @@ export default function Register() {
 
         {error && <p style={styles.error}>{error}</p>}
 
+        <input style={styles.input} placeholder="Full Name" value={name}
+          onChange={(e) => { setName(e.target.value); setError(""); }} />
         <input style={styles.input} placeholder="Email address" value={email}
           onChange={(e) => { setEmail(e.target.value); setError(""); }} />
-        <input style={styles.input} type="password" placeholder="Password" value={password}
+        <input style={styles.input} type="password" placeholder="Password (min. 6 chars)" value={password}
           onChange={(e) => { setPassword(e.target.value); setError(""); }} />
 
-        <button style={styles.btn} onClick={handleRegister}>Create Account</button>
+        <button style={styles.btn} onClick={handleRegister} disabled={loading}>
+          {loading ? "Creating account..." : "Create Account"}
+        </button>
 
         <p style={styles.loginText}>
           Already have an account?{" "}
